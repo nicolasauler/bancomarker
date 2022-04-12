@@ -5,10 +5,13 @@
 
 #include <sqlite3.h>
 
+#define NUMDBMS 3
+#define NLOOPS 100
+
 void printmenu(void);
-void printresults(void);
+void printresults(double times[NUMDBMS]);
 void executesqlite(void);
-double benchmark(int id);
+void executebenchmark(int id, double times[NUMDBMS]);
 
 void printmenu(void)
 {
@@ -21,11 +24,11 @@ void printmenu(void)
     printf("\n");
 }
 
-void printresults(void)
+void printresults(double times[NUMDBMS])
 {
     printmenu();
     printf("|         |RecUtils | SQLite  |  MySQL  |\n");
-    printf("| time    |         |         |         |\n");
+    printf("| time    | %.5f | %.5f | %.5f |\n", times[0], times[1], times[2]);
     printf("| readblty|         |         |         |\n");
     printmenu();
 }
@@ -47,23 +50,30 @@ void executesqlite(void)
     sqlite3_close_v2(daba);
 }
 
-double benchmark(int id)
+void executebenchmark(int id, double times[NUMDBMS])
 {
     int i;
     clock_t start_time = clock();
-    for(i = 0; i < 999; i++)
+    for(i = 0; i < NLOOPS; i++)
     {
-        executesqlite();
+        switch (id)
+        {
+            case (1):
+                executesqlite();
+                break;
+
+            default:
+                break;
+        }
     }
-    return((double)(clock() - start_time)/CLOCKS_PER_SEC);
+    times[id] = (double)(clock() - start_time)/CLOCKS_PER_SEC;
 }
-
-
 
 int main(void)
 {
+    double times[NUMDBMS];
     printf("Iniciando benchmarking...\n");
-    printresults();
-    printf("%f\n", benchmark(0));
+    executebenchmark(1, times);
+    printresults(times);
     return(0);
 }

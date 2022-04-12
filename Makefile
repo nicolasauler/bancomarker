@@ -1,17 +1,38 @@
+#######################################################
+
 CFLAGS=-Wall -Wextra -Wshadow -Wconversion -Wcast-align -Wunused -Wmissing-prototypes -Wno-missing-braces -ansi -pedantic -g -O2 -lsqlite3 #-D_POSIX_C_SOURCE=199309L
 CC=gcc
-OBJS=main.o
 
-all: main
+SRC=src
+SRCS=$(wildcard $(SRC)/*.c)
 
-main: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ 
+OBJ=obj
+OBJS=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
-run: main
-	./$^
-	
-%.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+BIN=bin
+BINS= $(BIN)/main
+
+#######################################################
+
+all: $(BINS)
+
+run: $(BINS)
+	./$(BINS)
+
+$(BINS): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(OBJ)/%.o: $(SRC)/%.c $(SRC)/%.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ)/%.o: $(SRC)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BIN):
+	mkdir $@
+
+$(OBJ):
+	mkdir $@
 
 clean:
-	rm -rf *.o main
+	rm -r $(OBJ) $(BIN)
