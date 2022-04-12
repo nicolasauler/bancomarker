@@ -64,6 +64,6 @@ int main(void)
 {
     printf("Iniciando benchmarking...\n");
     printresults();
-    printf("%f", benchmark(0));
+    printf("%f\n", benchmark(0));
     return(0);
 }

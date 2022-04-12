@@ -1,0 +1,16 @@
+SQLite version 3.38.2 2022-03-26 13:51:10
+Enter ".help" for usage hints.
+sqlite> .mode column
+sqlite> .headers on
+sqlite> .timer
+Usage: .timer on|off
+sqlite> .timer on
+sqlite> select * from Shit
+   ...> ;
+foo  bar     baz
+---  ------  ---
+0    merda   69 
+1    mierda  420
+Run Time: real 0.000 user 0.000126 sys 0.000090
+sqlite> 
+
