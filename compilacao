@@ -1,0 +1,1 @@
+$ gcc -o version version.c -lsqlite3 -std=c99
