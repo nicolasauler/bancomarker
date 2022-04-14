@@ -3,10 +3,9 @@
 #include <errno.h>
 #include <time.h>
 #include <string.h>
-
-#include <sqlite3.h>
 #include <mysql/mysql.h>
 
+#include <sqlite3.h>
 
 #define NUMDBMS 3
 #define NLOOPS 100
@@ -37,7 +36,7 @@ void printresults(double times[NUMDBMS])
     printmenu();
     printf("|         |RecUtils | SQLite  |  MySQL  |\n");
     printf("| time    | %.5f | %.5f | %.5f |\n", times[0], times[1], times[2]);
-    printf("| readblty|Best     |Good     |No       |\n");
+    printf("| readblty|         |         |         |\n");
     printmenu();
 }
 
@@ -65,13 +64,23 @@ void executesqlite(void)
                 DROP TABLE IF EXISTS IBGE;\
                 CREATE TABLE IBGE(localidade INT, estado VARCHAR(10), cidade VARCHAR(10), municipio VARCHAR(10));\
                 INSERT INTO IBGE VALUES(0, 'sao_paulo', 'sao_paulo', 'butanta');\
-                INSERT INTO IBGE VALUES(1, 'df', 'brasilia', 'sudoeste');";
+                INSERT INTO IBGE VALUES(1, 'df', 'brasilia', 'sudoeste');\
+                SELECT * FROM Zonas;\
+                SELECT * FROM Eleitor;\
+                SELECT * FROM Voto;\
+                SELECT * FROM IBGE;";
     sqlite3_exec(daba, sql_stmt, NULL, NULL, NULL);
     sqlite3_close_v2(daba);
 }
 
 void executemysql(void)
 {
+    /*
+    MYSQL_STMT *sql_stmt;
+
+    char *stmt;
+    */
+
     MYSQL *conn = mysql_init(NULL);
 
     if (conn == NULL)
@@ -87,6 +96,43 @@ void executemysql(void)
         mysql_close(conn);
         exit(ENOTCONN);
     }
+
+    /*
+    if (mysql_query(conn, "use caio;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+    */
+
+    /*
+    sql_stmt = mysql_stmt_init(conn);
+    */
+
+    /*sql_stmt = "DROP TABLE IF EXISTS Voto;\
+                CREATE TABLE Voto(titulo INT, secao INT, zona INT, depE INT, depF INT, sen INT, gov INT, pres INT, time DATETIME);\
+                */
+
+    /*
+    stmt = "DROP TABLE IF EXISTS Voto;CREATE TABLE Voto(titulo INT, secao INT, zona INT, depE INT, depF INT, sen INT, gov INT, pres INT, time DATETIME);";
+
+    if (mysql_stmt_prepare(sql_stmt, stmt, strlen(stmt)))
+    {
+      fprintf(stderr, " mysql_stmt_prepare(), CREATE failed\n");
+      fprintf(stderr, " %s\n", mysql_stmt_error(sql_stmt));
+      exit(0);
+    }
+    printf("create successfull\n");
+
+
+    if (mysql_stmt_execute(sql_stmt))
+    {
+      fprintf(stderr, " mysql_stmt_execute(), 1 failed\n");
+      fprintf(stderr, " %s\n", mysql_stmt_error(sql_stmt));
+      exit(0);
+    }
+    */
 
     if (mysql_query(conn, "use caio;"))
     {
@@ -206,6 +252,55 @@ void executemysql(void)
         mysql_close(conn);
         exit(1);
     }
+
+    /*
+    if (mysql_query(conn, "SELECT * FROM Zonas;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+
+    if (mysql_query(conn, "SELECT * FROM Eleitor;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+
+    if (mysql_query(conn, "SELECT * FROM Voto;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+
+    if (mysql_query(conn, "SELECT * FROM IBGE;"))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+    */
+
+
+   /* 
+    sql_stmt = "DROP TABLE IF EXISTS Shit;\
+                CREATE TABLE Shit(foo INT, bar TEXT, baz INT);\
+                INSERT INTO Shit VALUES(0, 'merda', 69);\
+                INSERT INTO Shit VALUES(1, 'mierda', 420);";
+    */
+
+    /*
+    if (mysql_stmt_close(sql_stmt))
+    {
+      mysql_stmt_close() invalidates stmt, so call          
+       mysql_error(mysql) rather than mysql_stmt_error(stmt) 
+      fprintf(stderr, " failed while closing the statement\n");
+      fprintf(stderr, " %s\n", mysql_error(conn));
+      exit(0);
+    }
+    */
 
     mysql_close(conn);
 }

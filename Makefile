@@ -1,6 +1,6 @@
 #######################################################
 
-CFLAGS=-Wall -Wextra -Wshadow -Wconversion -Wcast-align -Wunused -Wmissing-prototypes -Wno-missing-braces -ansi -pedantic -g -O2 -lsqlite3 #-D_POSIX_C_SOURCE=199309L
+CFLAGS=-Wall -Wextra -Wshadow -Wconversion -Wcast-align -Wunused -Wmissing-prototypes -Wno-missing-braces -std=c99 -pedantic -g -O2 -lsqlite3 -lmysqlclient #-D_POSIX_C_SOURCE=199309L
 CC=gcc
 
 SRC=src
