@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
-
+#include <mysql.h>
 #include <sqlite3.h>
 
 #define NUMDBMS 3
@@ -48,6 +48,23 @@ void executesqlite(void)
                 INSERT INTO Shit VALUES(1, 'mierda', 420);";
     sqlite3_exec(daba, sql_stmt, NULL, NULL, NULL);
     sqlite3_close_v2(daba);
+}
+
+void executemysql(void)
+{
+    char *sql_stmt;
+    MYSQL *daba = mysql_init(NULL);
+    if(mysql_real_connect(daba, "localhost", "root", "1234" | NULL, 0, NULL, 0) == NULL)
+    {
+        mysql_close(daba);
+        exit(EXIT_FAILURE);
+    }
+    sql_stmt = "DROP TABLE IF EXISTS Shit;\
+                CREATE TABLE Shit(foo INTEGER, bar VARCHAR(10), baz INTEGER);\
+                INSERT INTO Shit VALUES(0, 'merda', 69);\
+                INSERT INTO Shit VALUES(1, 'mierda', 420);";
+    mysql_exec(daba, sql_stmt, NULL, NULL, NULL);
+    mysql_close(daba);
 }
 
 void executebenchmark(int id, double times[NUMDBMS])
