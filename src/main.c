@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
-
-#include <sqlite3.h>
+#include <libpq-fe.h>
 
 #define NUMDBMS 3
 #define NLOOPS 100
@@ -12,6 +11,9 @@ void printmenu(void);
 void printresults(double times[NUMDBMS]);
 void executesqlite(void);
 void executebenchmark(int id, double times[NUMDBMS]);
+void executepostgresql(void);
+void do_exit(PGconn *conn, PGresult *res);
+void querypostgresql(void);
 
 void printmenu(void)
 {
@@ -50,6 +52,87 @@ void executesqlite(void)
     sqlite3_close_v2(daba);
 }
 
+void do_exit(PGconn *conn, PGresult *res) {
+    
+    fprintf(stderr, "%s\n", PQerrorMessage(conn));    
+
+    PQclear(res);
+    PQfinish(conn);    
+    
+    exit(1);
+}
+
+void querypostgresql(void) {
+    PGconn *conn = PQconnectdb("user=nicao dbname=testes");
+
+    if (PQstatus(conn) == CONNECTION_BAD) {
+        
+        fprintf(stderr, "Connection to database failed: %s\n",
+            PQerrorMessage(conn));
+        do_exit(conn);
+    }
+
+    PGresult *res = PQexec(conn, "SELECT * from Shit");    
+    
+    if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+
+        printf("No data retrieved\n");        
+        PQclear(res);
+        do_exit(conn);
+    }    
+
+    printf("%s\n", PQgetvalue(res, 0, 0));
+}
+
+void executepostgresql() {
+    
+    PGconn *conn = PQconnectdb("user=nicao dbname=testes");
+
+    if (PQstatus(conn) == CONNECTION_BAD) {
+        
+        fprintf(stderr, "Connection to database failed: %s\n",
+            PQerrorMessage(conn));
+            
+        PQfinish(conn);
+        exit(1);
+    }
+
+    PGresult *res = PQexec(conn, "DROP TABLE IF EXISTS Shit");
+    
+    if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+        do_exit(conn, res);
+    }
+    
+    PQclear(res);
+    
+    res = PQexec(conn, "CREATE TABLE Shit(foo INTEGER PRIMARY KEY," \
+        "bar TEXT, baz INT)");
+        
+    if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+        do_exit(conn, res); 
+    }
+    
+    PQclear(res);
+    
+    res = PQexec(conn, "INSERT INTO Cars VALUES(0,'merda',69)");
+        
+    if (PQresultStatus(res) != PGRES_COMMAND_OK) 
+        do_exit(conn, res);     
+    
+    PQclear(res);    
+    
+    res = PQexec(conn, "INSERT INTO Cars VALUES(1,'mierda',420)");
+        
+    if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+        do_exit(conn, res);   
+    }
+
+    querypostgresql(); /* roda uma consulta da tabela no geral */
+    
+    PQclear(res);    
+    PQfinish(conn);
+}
+
 void executebenchmark(int id, double times[NUMDBMS])
 {
     int i;
@@ -62,6 +145,10 @@ void executebenchmark(int id, double times[NUMDBMS])
                 executesqlite();
                 break;
 
+            case (2):
+                executepostgresql();
+                break;
+                
             default:
                 break;
         }
