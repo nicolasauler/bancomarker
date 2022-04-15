@@ -4,6 +4,9 @@
 #include <time.h>
 #include <string.h>
 
+#include <ncurses.h>
+#include "menu.h"
+
 #include <sqlite3.h>
 #include <mysql/mysql.h>
 
@@ -15,30 +18,30 @@
 #define EXEMYSQL 2
 
 
-void printmenu(void);
-void printresults(double times[NUMDBMS]);
+void printbox(WINDOW *win);
+void printresults(WINDOW *win, double times[NUMDBMS]);
 void executesqlite(void);
 void executemysql(void);
 void executebenchmark(int id, double times[NUMDBMS]);
 
-void printmenu(void)
+void printbox(WINDOW *win)
 {
     int i;
-    printf(" ");
-    for(i = 0; i < 39; i++)
+    wprintw(win, " ");
+    for(i = 0; i < 37; i++)
     {
-        printf("-");
+        wprintw(win, "-");
     }
-    printf("\n");
+    wprintw(win, "\n");
 }
 
-void printresults(double times[NUMDBMS])
+void printresults(WINDOW *win, double times[NUMDBMS])
 {
-    printmenu();
-    printf("|         |RecUtils | SQLite  |  MySQL  |\n");
-    printf("| time    | %.5f | %.5f | %.5f |\n", times[0], times[1], times[2]);
-    printf("| readblty|Best     |Good     |No       |\n");
-    printmenu();
+    printbox(win);
+    wprintw(win, "|       |RecUtils | SQLite  |  MySQL  |\n");
+    wprintw(win, "| time  | %.5f | %.5f | %.5f |\n", times[0], times[1], times[2]);
+    wprintw(win, "| easy  |Best     |Good     |No       |\n");
+    printbox(win);
 }
 
 void executesqlite(void)
@@ -235,10 +238,63 @@ void executebenchmark(int id, double times[NUMDBMS])
 
 int main(void)
 {
+    int xmax, ymax, pos;
+    char ch;
     double times[NUMDBMS];
-    printf("Iniciando benchmarking...\n");
-    executebenchmark(EXESQLite, times);
-    executebenchmark(EXEMYSQL, times);
-    printresults(times);
+    WINDOW *win;
+
+    pos = 1;
+
+
+    win = initandsetcurses(&xmax, &ymax);
+
+    printmenu(win, ymax, xmax, pos);
+
+    while((ch = (char)wgetch(win)))
+    {
+        switch (ch)
+        {
+            case ('j'):
+                wclear(win);
+                pos = (((++pos) > 3) ? 1 : pos);
+                printmenu(win, ymax, xmax, pos);
+                break;
+
+            case('k'):
+                wclear(win);
+                pos = (((--pos) < 1) ? 3 : pos);
+                printmenu(win, ymax, xmax, pos);
+                break;
+
+            case(10):
+                switch (pos)
+                {
+                    case (1):
+                        wclear(win);
+                        wprintw(win, "Iniciando benchmarking...\n");
+                        wrefresh(win);
+                        executebenchmark(EXESQLite, times);
+                        executebenchmark(EXEMYSQL, times);
+                        printresults(win, times);
+                        break;
+
+                    case (2):
+                        break;
+
+                    case (3):
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+
+            default:
+                printmenu(win, ymax, xmax, pos);
+                break;
+        }
+    }
+
+    endwin();
     return(0);
 }
